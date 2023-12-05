@@ -10,12 +10,12 @@ export class ScarpettaController {
   }
 
   @Get(':id')
-  scarpettaById(@Param('id') id: string) {
-    return `scarpetta: ${id}`;
+  scarpettaById(@Param('id') id: number) {
+    return this.scarpetteService.scarpettaById(id);
   }
 
   @Post('crea')
   creaScarpetta(@Body() scarpetta: any) {
-    return scarpetta;
+    return this.scarpetteService.creaScarpetta(scarpetta);
   }
 }

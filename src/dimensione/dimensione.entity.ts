@@ -7,10 +7,10 @@ export class Dimensione {
   id: number;
 
   @Column()
-  larghezza: string;
+  larghezza: number;
 
   @Column()
-  lunghezza: string;
+  lunghezza: number;
 
   @ManyToOne(() => Scarpetta, (scarpetta) => scarpetta.dimensioni)
   scarpetta: Scarpetta;

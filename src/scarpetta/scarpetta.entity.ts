@@ -16,10 +16,10 @@ export class Scarpetta {
   id: number;
 
   @Column()
-  name: string;
+  nome: string;
 
   @Column()
-  description: string;
+  descrizione: string;
 
   @Column('decimal')
   prezzo: number;
