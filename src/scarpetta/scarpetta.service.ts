@@ -1,79 +1,100 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Scarpetta } from './scarpetta.entity';
-import { Dimensione } from 'src/dimensione/dimensione.entity';
 import { Colore } from 'src/colore/colore.entity';
 import { Materiale } from 'src/materiale/materiale.entity';
+import { ScarpettaMateriale } from './scarpetta-materiale.entity';
 
 @Injectable()
 export class ScarpettaService {
   constructor(
     @InjectRepository(Scarpetta) private scarpettaRepo: Repository<Scarpetta>,
-    @InjectRepository(Dimensione)
-    private dimensioneRepo: Repository<Dimensione>,
+
     @InjectRepository(Colore) private coloreRepo: Repository<Colore>,
     @InjectRepository(Materiale) private materialeRepo: Repository<Materiale>,
+    @InjectRepository(ScarpettaMateriale)
+    private scarpettaMaterialeRepo: Repository<ScarpettaMateriale>,
   ) {}
   tutteLeScarpette() {
     return 'tutte le scarpette';
   }
 
-  async creaScarpetta(creaScarpettaDto: any) {
-    const scarpetta = new Scarpetta();
-    scarpetta.nome = creaScarpettaDto.nome;
-    scarpetta.descrizione = creaScarpettaDto.descrizione;
-    scarpetta.prezzo = creaScarpettaDto.prezzo;
+  async createScarpetta(createScarpettaDto: any) {
+    return await this.scarpettaRepo.manager.transaction(
+      async (entityManager) => {
+        const scarpetta = this.scarpettaRepo.create({
+          nome: createScarpettaDto.nome,
+          descrizione: createScarpettaDto.descrizione,
+          prezzo: createScarpettaDto.prezzo,
+          larghezza: createScarpettaDto.larghezza,
+          lunghezza: createScarpettaDto.lunghezza,
+          colori: [],
+        });
 
-    // Gestione delle dimensioni
-    scarpetta.dimensioni = creaScarpettaDto.dimensioni.map((d) => {
-      const dimensione = new Dimensione();
-      dimensione.larghezza = d.larghezza;
-      dimensione.lunghezza = d.lunghezza;
-      return dimensione;
-    });
+        const savedScarpetta = await entityManager.save(scarpetta);
 
-    const materiali = await this.materialeRepo.findBy({
-      id: In(creaScarpettaDto.materiali),
-    });
+        // Carica tutti i Materiali e Colori necessari in anticipo
+        const nomiMateriali = createScarpettaDto.materiali.map(
+          (m: any) => m.proprieta,
+        );
+        const materialiEsistenti = await this.materialeRepo.findBy({
+          proprieta: In(nomiMateriali),
+        });
+        const mappaMateriali = new Map(
+          materialiEsistenti.map((m) => [m.proprieta, m]),
+        );
 
-    scarpetta.materiali = materiali;
+        const coloriEsistenti = await this.coloreRepo.findBy({
+          id: In(createScarpettaDto.colori),
+        });
+        const mappaColori = new Map(coloriEsistenti.map((c) => [c.id, c]));
 
-    // Associazione dei colori esistenti
-    const colori = await this.coloreRepo.findBy({
-      id: In(creaScarpettaDto.colori),
-    });
-    scarpetta.colori = colori;
+        // Associa i materiali alla scarpetta
+        for (const materialeDto of createScarpettaDto.materiali) {
+          const materiale = mappaMateriali.get(materialeDto.proprieta);
+          if (!materiale) {
+            // Gestisci il caso in cui il materiale non è trovato
+            continue;
+          }
 
-    return this.scarpettaRepo.save(scarpetta);
+          const scarpettaMateriale = this.scarpettaMaterialeRepo.create({
+            scarpetta: savedScarpetta,
+            materiale,
+            percentuale: materialeDto.valore,
+          });
+
+          await entityManager.save(scarpettaMateriale);
+        }
+
+        // Associa i colori alla scarpetta
+        for (const coloreId of createScarpettaDto.colori) {
+          const colore = mappaColori.get(coloreId);
+          if (colore) {
+            savedScarpetta.colori.push(colore);
+          } else {
+            // Gestisci il caso in cui il colore non è trovato
+            continue;
+          }
+        }
+
+        await entityManager.save(savedScarpetta);
+
+        return savedScarpetta;
+      },
+    );
   }
 
   async scarpettaById(id: number) {
-    const scarpetta = await this.scarpettaRepo.findOne({
-      where: { id },
-      relations: ['dimensioni', 'materiali', 'colori'], // Assicurati che queste corrispondano ai nomi delle relazioni nel tuo modello
+    return this.scarpettaRepo.findOne({
+      where: {
+        id: id,
+      },
+      relations: [
+        'colori',
+        'scarpettaMateriali',
+        'scarpettaMateriali.materiale',
+      ],
     });
-
-    if (!scarpetta) {
-      throw new NotFoundException(
-        `Scarpetta con id ${id} non è stata trovata.`,
-      );
-    }
-
-    // Trasformare i risultati in formato desiderato
-    return {
-      nome: scarpetta.nome,
-      descrizione: scarpetta.descrizione,
-      prezzo: scarpetta.prezzo,
-      dimensioni: scarpetta.dimensioni.map((d) => ({
-        larghezza: d.larghezza,
-        lunghezza: d.lunghezza,
-      })),
-      materiali: scarpetta.materiali.map((m) => ({
-        proprieta: m.proprieta,
-        valore: m.valore,
-      })),
-      colori: scarpetta.colori.map((c) => c.colore), // Assumo che 'colore' sia una proprietà dell'entità 'Colore'
-    };
   }
 }

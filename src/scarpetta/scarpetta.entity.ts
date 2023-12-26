@@ -2,13 +2,12 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  OneToMany,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
-import { Materiale } from '../materiale/materiale.entity';
 import { Colore } from '../colore/colore.entity';
-import { Dimensione } from '../dimensione/dimensione.entity';
+import { ScarpettaMateriale } from './scarpetta-materiale.entity';
 
 @Entity()
 export class Scarpetta {
@@ -24,12 +23,17 @@ export class Scarpetta {
   @Column('decimal')
   prezzo: number;
 
-  @OneToMany(() => Dimensione, (dimensione) => dimensione.scarpetta)
-  dimensioni: Dimensione[];
+  @Column('float')
+  lunghezza: number;
 
-  @ManyToMany(() => Materiale)
-  @JoinTable()
-  materiali: Materiale[];
+  @Column('float')
+  larghezza: number;
+
+  @OneToMany(
+    () => ScarpettaMateriale,
+    (scarpettaMateriale) => scarpettaMateriale.scarpetta,
+  )
+  scarpettaMateriali: ScarpettaMateriale[];
 
   @ManyToMany(() => Colore)
   @JoinTable()

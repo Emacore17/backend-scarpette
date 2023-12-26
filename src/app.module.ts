@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScarpettaModule } from './scarpetta/scarpetta.module';
 import { MaterialeModule } from './materiale/materiale.module';
 import { ColoreModule } from './colore/colore.module';
-import { DimensioneModule } from './dimensione/dimensione.module';
 
 @Module({
   imports: [
@@ -20,7 +19,6 @@ import { DimensioneModule } from './dimensione/dimensione.module';
     ScarpettaModule,
     MaterialeModule,
     ColoreModule,
-    DimensioneModule,
   ],
   controllers: [],
   providers: [],

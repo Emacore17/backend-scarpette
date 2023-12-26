@@ -1,5 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
-import { Scarpetta } from '../scarpetta/scarpetta.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { ScarpettaMateriale } from 'src/scarpetta/scarpetta-materiale.entity';
 
 @Entity()
 export class Materiale {
@@ -9,9 +9,9 @@ export class Materiale {
   @Column()
   proprieta: string;
 
-  @Column('float')
-  valore: number;
-
-  @ManyToMany(() => Scarpetta, (scarpetta) => scarpetta.materiali)
-  scarpette: Scarpetta[];
+  @OneToMany(
+    () => ScarpettaMateriale,
+    (scarpettaMateriale) => scarpettaMateriale.materiale,
+  )
+  scarpettaMateriali: ScarpettaMateriale[];
 }

@@ -16,6 +16,6 @@ export class ScarpettaController {
 
   @Post('crea')
   creaScarpetta(@Body() scarpetta: any) {
-    return this.scarpetteService.creaScarpetta(scarpetta);
+    return this.scarpetteService.createScarpetta(scarpetta);
   }
 }
