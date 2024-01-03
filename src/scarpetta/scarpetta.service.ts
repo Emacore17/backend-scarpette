@@ -25,6 +25,10 @@ export class ScarpettaService {
     return 1000;
   }
 
+  pippo() {
+    return 'pippo';
+  }
+
   async createScarpetta(createScarpettaDto: any) {
     return await this.scarpettaRepo.manager.transaction(
       async (entityManager) => {
