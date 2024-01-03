@@ -17,7 +17,7 @@ export class ScarpettaService {
     private scarpettaMaterialeRepo: Repository<ScarpettaMateriale>,
   ) {}
   tutteLeScarpette() {
-    return 'tutte le scarpette';
+    return 'all scarpette';
   }
 
   async createScarpetta(createScarpettaDto: any) {
