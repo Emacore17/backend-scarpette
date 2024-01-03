@@ -17,10 +17,6 @@ export class ScarpettaService {
     private scarpettaMaterialeRepo: Repository<ScarpettaMateriale>,
   ) {}
 
-  ciao() {
-    return 'ciao';
-  }
-
   tutteLeScarpette() {
     return 'all scarpette';
   }
