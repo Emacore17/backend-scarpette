@@ -16,6 +16,11 @@ export class ScarpettaService {
     @InjectRepository(ScarpettaMateriale)
     private scarpettaMaterialeRepo: Repository<ScarpettaMateriale>,
   ) {}
+
+  ciao() {
+    return 'ciao';
+  }
+
   tutteLeScarpette() {
     return 'tutte le scarpette';
   }
