@@ -22,7 +22,7 @@ export class ScarpettaService {
   }
 
   tutteLeScarpette() {
-    return 'tutte le scarpette';
+    return 'all scarpette';
   }
 
   async createScarpetta(createScarpettaDto: any) {
