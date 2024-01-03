@@ -21,6 +21,10 @@ export class ScarpettaService {
     return 'all scarpette';
   }
 
+  saluto() {
+    return 1000;
+  }
+
   pippo() {
     return 'pippo';
   }
